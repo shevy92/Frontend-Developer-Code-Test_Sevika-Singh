@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   
+    <!--Page title-->   
+    <title>Frontend-Developer Code Test</title>
+   
+    <!--Links to CSS and JS-->
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="jsgrid/jsgrid.min.css" />
+    <link type="text/css" rel="stylesheet" href="jsgrid/jsgrid-theme.min.css" />
+    <script type="text/javascript" src="jsgrid/jsgrid.min.js"></script>
+    
+</head>
+
+<body>
+
+    <!--Page header-->
+    <div id="header">
+      <h1>Welcome!</h1> 
+    </div>
+    
+    <!--Container for table-->
+    <div id="jsGrid"></div>
+
+    <!--Script to create table-->
+    <script>
+        
+        //Create empty array for data
+        var data1 = {};
+        
+        
+        //Import data from JSON file into array
+        $.ajax({
+            url: "../json/schools.json",
+            async: false,
+            dataType: 'json',
+            success: function(data) {
+                data1 = data;
+            }
+        });
+        
+        //Build Table
+        $("#jsGrid").jsGrid({
+            
+            //Size table
+            width: "100%",
+            height: "100%",
+
+            //Table functionality
+            inserting: true,
+            filtering: true,
+            editing: true,
+            sorting: true,
+            paging: true,
+            autoload: true,
+            
+            text: {
+                autosearch: true
+            },
+            
+            select: {
+                name: "Country",
+                type: "select",
+                items: [ "", "United States", "Canada", "United Kingdom" ]
+            },
+            
+            controller: {
+                loadData: function(filter) {
+                        var d = $.Deferred();
+
+                        $.ajax({
+                            type: "GET",
+                            url: "json/schools.json",
+                            data: filter,
+                            dataType: "JSON"
+                        }).done(function(response) {
+                            console.log(response);
+                            d.resolve(response.value);
+                        }).fail(function (request, status, error) {
+                            alert(request.responseText);
+                        });
+
+                        return d.promise();
+                }
+            },
+            
+            
+            //Number of items to display per page
+            pageSize: 10,
+
+            //Data set to use (multiple can be used)
+            data: data1,
+
+            //Fields for headers. Name is title, tyle is type of content
+            fields: [
+                { name: "Name", type: "text", validate: "required" },
+                { name: "County", type: "text" },
+                { name: "Students", type: "number" },
+                { name: "Grades", type: "text"},
+                { type: "control" }
+            ]
+        });
+        
+        //Settings for filterings
+        var grid = $("#jsGrid").data("JSGrid");
+
+        grid.search(gridSettings.filter).done(function() {
+            grid.sort({
+                field: gridSettings.sorting.sortField,
+                order: gridSettings.sorting.sortOrder
+            }).done(function() {
+                grid.option("pageIndex", gridSettings.pageIndex);
+            });
+        });
+        
+        
+        
+        
+        
+</script>
+
+</body>
+
+</html>
